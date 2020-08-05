@@ -8,10 +8,7 @@ import com.lucifiere.funtion.BiFunction;
 import com.lucifiere.funtion.Function;
 import com.lucifiere.funtion.Predicate;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author created by XD.Wang
@@ -151,29 +148,54 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
     }
 
     @Override
-    public BiStream<K, V> compute(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        return null;
-    }
-
-    @Override
-    public BiStream<K, V> computeIfAbsent(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        return null;
-    }
-
-    @Override
-    public BiStream<K, V> computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public Optional<V> compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         Preconditions.checkNotNull(remappingFunction);
-        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        V oldValue = innerMap.get(key);
+
+        V newValue = remappingFunction.apply(key, oldValue);
+        if (newValue == null) {
+            if (oldValue != null || innerMap.containsKey(key)) {
+                innerMap.remove(key);
+                return Optional.absent();
+            } else {
+                return Optional.absent();
+            }
+        } else {
+            // add or replace old mapping
+            innerMap.put(key, newValue);
+            return Optional.of(newValue);
+        }
+    }
+
+    @Override
+    public Optional<V> computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+        Preconditions.checkNotNull(mappingFunction);
+        V v;
+        if ((v = innerMap.get(key)) == null) {
+            V newValue;
+            if ((newValue = mappingFunction.apply(key)) != null) {
+                innerMap.put(key, newValue);
+                return Optional.of(newValue);
+            }
+        }
+        return Optional.fromNullable(v);
+    }
+
+    @Override
+    public Optional<V> computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Preconditions.checkNotNull(remappingFunction);
         V oldValue;
         if ((oldValue = innerMap.get(key)) != null) {
             V newValue = remappingFunction.apply(key, oldValue);
             if (newValue != null) {
-                mapAfterTransfer.put(key, newValue);
+                innerMap.put(key, newValue);
+                return Optional.of(oldValue);
             } else {
                 innerMap.remove(key);
+                return Optional.absent();
             }
         }
-        return ofBiStream(innerMap);
+        return Optional.absent();
     }
 
     @Override
@@ -221,12 +243,15 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
 
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
-
+        Preconditions.checkNotNull(action);
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            action.accept(entry.getKey(), entry.getValue());
+        }
     }
 
     @Override
     public long count() {
-        return 0;
+        return innerMap.size();
     }
 
     @Override

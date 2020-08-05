@@ -47,7 +47,7 @@ public interface BiStream<K, V> {
      * @param remappingFunction 生成函数
      * @return 结果流
      */
-    BiStream<K, V> compute(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction);
+    Optional<V> compute(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction);
 
     /**
      * 缺失即计算值
@@ -56,7 +56,7 @@ public interface BiStream<K, V> {
      * @param remappingFunction 生成函数
      * @return 结果流
      */
-    BiStream<K, V> computeIfAbsent(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction);
+    Optional<V> computeIfAbsent(K k, Function<? super K, ? extends V> remappingFunction);
 
     /**
      * 出现即替代值
@@ -65,7 +65,7 @@ public interface BiStream<K, V> {
      * @param remappingFunction 生成函数
      * @return 结果流
      */
-    BiStream<K, V> computeIfPresent(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction);
+    Optional<V> computeIfPresent(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction);
 
     /**
      * 映射
