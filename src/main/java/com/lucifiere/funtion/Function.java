@@ -2,8 +2,6 @@ package com.lucifiere.funtion;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Objects;
-
 /**
  * 函数映射
  *
@@ -32,7 +30,7 @@ public abstract class Function<T, R> {
      * @throws NullPointerException if before is null
      * @see #andThen(Function)
      */
-    <V> Function<V, R> compose(final Function<V, T> before) {
+    <V> Function<V, R> compose(final Function<? super V, ? extends T> before) {
         Preconditions.checkNotNull(before);
         final Function<T, R> self = this;
         return new Function<V, R>() {
@@ -45,10 +43,7 @@ public abstract class Function<T, R> {
     }
 
     /**
-     * Returns a composed function that first applies this function to
-     * its input, and then applies the {@code after} function to the result.
-     * If evaluation of either function throws an exception, it is relayed to
-     * the caller of the composed function.
+     * 返回一个组合函数，该函数首先将此函数应用于输入，然后将after函数应用于结果
      *
      * @param <V>   the type of output of the {@code after} function, and of the
      *              composed function
@@ -58,25 +53,31 @@ public abstract class Function<T, R> {
      * @throws NullPointerException if after is null
      * @see #compose(Function)
      */
-    <V> Function<R, V> andThen(Function<? super R, ? extends T> after) {
+    <V> Function<T, V> andThen(final Function<? super R, ? extends V> after) {
         Preconditions.checkNotNull(after);
-        final Function<R, V> self = this;
-        return new Function<V, R>() {
+        final Function<T, R> self = this;
+        return new Function<T, V>() {
             @Override
-            R apply(V v) {
-                return before.apply(v);
+            V apply(T v) {
+                R t = self.apply(v);
+                return after.apply(t);
             }
         };
     }
 
     /**
-     * Returns a function that always returns its input argument.
+     * 返回始终返回其输入参数的函数
      *
      * @param <T> the type of the input and output objects to the function
      * @return a function that always returns its input argument
      */
     static <T> Function<T, T> identity() {
-        return t -> t;
+        return new Function<T, T>() {
+            @Override
+            T apply(T t) {
+                return t;
+            }
+        };
     }
 
 }
