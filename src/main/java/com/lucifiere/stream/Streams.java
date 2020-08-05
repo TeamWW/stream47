@@ -11,7 +11,7 @@ import java.util.Map;
 final public class Streams {
 
     public static <T, K, V> Stream<T> of(Map<K, V> map) {
-        return new MapStream<T,K,V>()
+        return null;
     }
 
 }
