@@ -15,6 +15,6 @@ public abstract class BiFunction<T, U, R> {
      * @param u the function argument
      * @return the function result
      */
-    abstract R apply(T t, U u);
+    public abstract R apply(T t, U u);
 
 }

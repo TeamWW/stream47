@@ -16,7 +16,7 @@ public abstract class Function<T, R> {
      * @param t the function argument
      * @return the function result
      */
-    abstract R apply(T t);
+    public abstract R apply(T t);
 
     /**
      * 返回一个组合函数，该函数首先将before函数应用于其输入，然后将该函数应用于结果。
@@ -35,7 +35,7 @@ public abstract class Function<T, R> {
         final Function<T, R> self = this;
         return new Function<V, R>() {
             @Override
-            R apply(V v) {
+            public R apply(V v) {
                 T t = before.apply(v);
                 return self.apply(t);
             }
@@ -58,7 +58,7 @@ public abstract class Function<T, R> {
         final Function<T, R> self = this;
         return new Function<T, V>() {
             @Override
-            V apply(T v) {
+            public V apply(T v) {
                 R t = self.apply(v);
                 return after.apply(t);
             }
@@ -74,7 +74,7 @@ public abstract class Function<T, R> {
     static <T> Function<T, T> identity() {
         return new Function<T, T>() {
             @Override
-            T apply(T t) {
+            public T apply(T t) {
                 return t;
             }
         };

@@ -17,9 +17,9 @@ public abstract class Predicate<T> {
      * @return {@code true} if the input argument matches the predicate,
      * otherwise {@code false}
      */
-    abstract boolean test(T t);
+    public abstract boolean test(T t);
 
-    Predicate<T> and(final Predicate<? super T> other) {
+    public Predicate<T> and(final Predicate<? super T> other) {
         Preconditions.checkNotNull(other);
         final Predicate<T> self = this;
         return new Predicate<T>() {
@@ -36,7 +36,7 @@ public abstract class Predicate<T> {
      * @return a predicate that represents the logical negation of this
      * predicate
      */
-    Predicate<T> negate() {
+    public Predicate<T> negate() {
         final Predicate<T> self = this;
         return new Predicate<T>() {
             @Override
@@ -55,7 +55,7 @@ public abstract class Predicate<T> {
      * OR of this predicate and the {@code other} predicate
      * @throws NullPointerException if other is null
      */
-    Predicate<T> or(final Predicate<? super T> other) {
+    public Predicate<T> or(final Predicate<? super T> other) {
         Preconditions.checkNotNull(other);
         final Predicate<T> self = this;
         return new Predicate<T>() {

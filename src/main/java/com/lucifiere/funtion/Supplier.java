@@ -13,6 +13,6 @@ public abstract class Supplier<T> {
      *
      * @return a result
      */
-    abstract T get();
+    public abstract T get();
 
 }

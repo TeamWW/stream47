@@ -15,7 +15,7 @@ public abstract class Consumer<T> {
      *
      * @param t the input argument
      */
-    abstract void accept(T t);
+    public abstract void accept(T t);
 
     /**
      * 返回一个组合的Consumer，它依次执行此操作，然后执行after操作
@@ -30,7 +30,7 @@ public abstract class Consumer<T> {
         final Consumer<T> self = this;
         return new Consumer<T>() {
             @Override
-            void accept(T t) {
+            public void accept(T t) {
                 self.accept(t);
                 after.accept(t);
             }
