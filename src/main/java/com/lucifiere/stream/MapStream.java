@@ -1,9 +1,11 @@
 package com.lucifiere.stream;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.lucifiere.funtion.*;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,15 +16,22 @@ import java.util.Map;
  */
 public class MapStream<K, V, T extends Map.Entry<K, V>> implements Stream<T> {
 
-    private final Map<K, V> sourceMap;
+    private final Map<K, V> innerMap;
 
-    public MapStream(Map<K, V> sourceMap) {
-        this.sourceMap = sourceMap;
+    public MapStream(Map<K, V> innerMap) {
+        Preconditions.checkNotNull(innerMap);
+        this.innerMap = innerMap;
     }
 
     @Override
     public Stream<T> filter(Predicate<? super T> predicate) {
-        return null;
+        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.size());
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            if (predicate.test(entry)) {
+                mapAfterTransfer.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return Streams.of(mapAfterTransfer);
     }
 
     @Override
