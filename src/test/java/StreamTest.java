@@ -33,18 +33,18 @@ public class StreamTest {
         Map<Integer, String> map = new HashMap<>();
         map.put(1, "xxx");
         map.put(2, "sss");
-        Stream<Map.Entry<Integer, String>> s = Streams.of(map).filter(new Predicate<Map.Entry<Integer, String>>() {
-            @Override
-            public boolean test(Map.Entry<Integer, String> integerStringEntry) {
-                return integerStringEntry.getKey() > 1;
-            }
-        }).map(new Function<Map.Entry<Integer, String>, Map.Entry<Integer, String>>() {
-            @Override
-            public Map.Entry<Integer, String> apply(Map.Entry<Integer, String> integerStringEntry) {
-                return null;
-            }
-        });
-        System.out.println(s);
+//        Stream<Map.Entry<Integer, String>> s = Streams.of(map).filter(new Predicate<Map.Entry<Integer, String>>() {
+//            @Override
+//            public boolean test(Map.Entry<Integer, String> integerStringEntry) {
+//                return integerStringEntry.getKey() > 1;
+//            }
+//        }).map(new Function<Map.Entry<Integer, String>, Map.Entry<Integer, String>>() {
+//            @Override
+//            public Map.Entry<Integer, String> apply(Map.Entry<Integer, String> integerStringEntry) {
+//                return null;
+//            }
+//        });
+//        System.out.println(s);
     }
 
 }

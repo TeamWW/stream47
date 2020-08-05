@@ -7,9 +7,11 @@ import com.lucifiere.funtion.BiConsumer;
 import com.lucifiere.funtion.BiFunction;
 import com.lucifiere.funtion.Function;
 import com.lucifiere.funtion.Predicate;
-import org.apache.commons.lang3.RandomUtils;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author created by XD.Wang
@@ -50,7 +52,7 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
         this.limit = limit;
     }
 
-    private static <K, V> BiStream<K, V> ofBiStream(Map<K, V> innerMap) {
+    public static <K, V> BiStream<K, V> ofBiStream(Map<K, V> innerMap) {
         return new MapStream<>(Optional.fromNullable(innerMap).or(Maps.<K, V>newConcurrentMap()));
     }
 

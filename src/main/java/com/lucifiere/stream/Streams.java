@@ -14,7 +14,7 @@ import java.util.Map;
 final public class Streams {
 
     public static <K, V> BiStream<K, V> of(Map<K, V> map) {
-        return new BiStream<>(map);
+        return MapStream.ofBiStream(map);
     }
 
     public static <T> Stream<T> of(List<T> ll) {
