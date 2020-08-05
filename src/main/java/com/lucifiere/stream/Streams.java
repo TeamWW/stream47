@@ -1,5 +1,8 @@
 package com.lucifiere.stream;
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,8 +13,17 @@ import java.util.Map;
  */
 final public class Streams {
 
-    public static <T, K, V> Stream<T> of(Map<K, V> map) {
-        return null;
+    public static <T extends Map.Entry<K, V>, K, V> Stream<T> of(Map<K, V> map) {
+        return new MapStream<>(map);
     }
 
+    public static <T> Stream<T> of(List<T> ll) {
+        return new ListStream<>(ll);
+    }
+
+    @SafeVarargs
+    public static <T> Stream<T> of(T... ll) {
+        return of(Lists.newArrayList(ll));
+    }
+    
 }
