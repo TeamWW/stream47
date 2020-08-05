@@ -14,6 +14,7 @@ import java.util.Map;
  * @author created by XD.Wang
  * Date 2020/8/5.
  */
+@SuppressWarnings("unchecked")
 public class MapStream<K, V, T extends Map.Entry<K, V>> implements Stream<T> {
 
     private final Map<K, V> innerMap;
@@ -27,7 +28,7 @@ public class MapStream<K, V, T extends Map.Entry<K, V>> implements Stream<T> {
     public Stream<T> filter(Predicate<? super T> predicate) {
         Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.size());
         for (Map.Entry<K, V> entry : innerMap.entrySet()) {
-            if (predicate.test(entry)) {
+            if (predicate.test((T) entry)) {
                 mapAfterTransfer.put(entry.getKey(), entry.getValue());
             }
         }
@@ -123,4 +124,5 @@ public class MapStream<K, V, T extends Map.Entry<K, V>> implements Stream<T> {
     public <R, A> R collect(Supplier<A> supplier) {
         return null;
     }
+
 }
