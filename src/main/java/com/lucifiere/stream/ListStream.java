@@ -5,6 +5,7 @@ import com.lucifiere.funtion.*;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * LIST流
@@ -111,7 +112,24 @@ public class ListStream<T> implements Stream<T> {
     }
 
     @Override
-    public <R, A> R collect(Supplier<A> supplier) {
+    public List<T> toList() {
         return null;
     }
+
+    @Override
+    public List<T> toSet() {
+        return null;
+    }
+
+    @Override
+    public <K, V> Map<K, List<V>> singleGroupBy(Function<T, K> function) {
+        return null;
+    }
+
+    @Override
+    public <K, V> Map<K, V> groupBy(Function<T, K> function) {
+        return null;
+    }
+
+
 }

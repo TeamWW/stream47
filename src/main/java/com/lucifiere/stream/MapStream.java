@@ -2,92 +2,224 @@ package com.lucifiere.stream;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.lucifiere.funtion.*;
+import com.google.common.collect.Maps;
+import com.lucifiere.funtion.BiConsumer;
+import com.lucifiere.funtion.BiFunction;
+import com.lucifiere.funtion.Function;
+import com.lucifiere.funtion.Predicate;
+import org.apache.commons.lang3.RandomUtils;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Map流，处理ENTRY成员
- *
  * @author created by XD.Wang
  * Date 2020/8/5.
  */
-@SuppressWarnings("unchecked")
-public class MapStream<K, V, T extends Map.Entry<K, V>> implements Stream<T> {
+public class MapStream<K, V> implements SortedBiStream<K, V> {
 
+    /**
+     * 内部映射
+     */
     private final Map<K, V> innerMap;
 
+    /**
+     * 游标
+     */
+    private final int cursor;
+
+    /**
+     * 上限
+     */
+    private final int limit;
+
     public MapStream(Map<K, V> innerMap) {
-        Preconditions.checkNotNull(innerMap);
         this.innerMap = innerMap;
+        this.cursor = 0;
+        this.limit = innerMap.size() - 1;
+    }
+
+    public MapStream(Map<K, V> innerMap, int cursor) {
+        this.innerMap = innerMap;
+        this.cursor = cursor;
+        this.limit = innerMap.size() - 1;
+    }
+
+    public MapStream(Map<K, V> innerMap, int cursor, int limit) {
+        this.innerMap = innerMap;
+        this.cursor = cursor;
+        this.limit = limit;
+    }
+
+    private static <K, V> BiStream<K, V> ofBiStream(Map<K, V> innerMap) {
+        return new MapStream<>(Optional.fromNullable(innerMap).or(Maps.<K, V>newConcurrentMap()));
+    }
+
+    private static <K extends Comparable<K>, V> SortedBiStream<K, V> ofSortedStream(Map<K, V> innerMap) {
+        if (innerMap == null || innerMap.size() == 0) {
+            return new MapStream<>(new TreeMap<K, V>());
+        }
+        Map<K, V> newMap = new TreeMap<>(innerMap);
+        return new MapStream<>(newMap);
+    }
+
+    private static <K, V> SortedBiStream<K, V> ofSortedStream(Map<K, V> innerMap, Comparator<? super K> comparator) {
+        return new MapStream<>(toSortMap(innerMap, comparator));
+    }
+
+    private static <K, V> TreeMap<K, V> toSortMap(Map<K, V> innerMap, Comparator<? super K> comparator) {
+        if (innerMap == null || innerMap.size() == 0) {
+            return new TreeMap<>(comparator);
+        }
+        if (innerMap instanceof TreeMap) {
+            return (TreeMap<K, V>) innerMap;
+        }
+        TreeMap<K, V> map = new TreeMap<>(comparator);
+        map.putAll(innerMap);
+        return map;
     }
 
     @Override
-    public Stream<T> filter(Predicate<? super T> predicate) {
-        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.size());
+    public <C extends Comparable<C>> SortedBiStream<C, V> sorted() {
+        return null;
+    }
+
+    @Override
+    public SortedBiStream<K, V> sorted(Comparator<? super K> comparator) {
+        return ofSortedStream(innerMap, comparator);
+    }
+
+    @Override
+    public SortedBiStream<K, V> limit(int maxSize) {
+        return new MapStream<>(innerMap, 0, maxSize);
+    }
+
+    @Override
+    public SortedBiStream<K, V> skip(int n) {
+        return new MapStream<>(innerMap, cursor + n);
+    }
+
+    @Override
+    public Optional<Map.Entry<K, V>> min(Comparator<? super K> comparator) {
+        TreeMap<K, V> map = toSortMap(innerMap, comparator);
+        return Optional.fromNullable(map.firstEntry());
+    }
+
+    @Override
+    public Optional<Map.Entry<K, V>> max(Comparator<? super K> comparator) {
+        TreeMap<K, V> map = toSortMap(innerMap, comparator);
+        return Optional.fromNullable(map.lastEntry());
+    }
+
+    @Override
+    public Optional<Map.Entry<K, V>> findAny() {
+        return null;
+    }
+
+    @Override
+    public BiStream<K, V> filter(BiFunction<K, V, Boolean> predicate) {
+        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
         for (Map.Entry<K, V> entry : innerMap.entrySet()) {
-            if (predicate.test((T) entry)) {
+            if (predicate.apply(entry.getKey(), entry.getValue())) {
                 mapAfterTransfer.put(entry.getKey(), entry.getValue());
             }
         }
-        return Streams.of(mapAfterTransfer);
+        return ofBiStream(mapAfterTransfer);
     }
 
     @Override
-    public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
+    public BiStream<K, V> filterKey(Predicate<? super K> keyPredicate) {
+        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            if (keyPredicate.test(entry.getKey())) {
+                mapAfterTransfer.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return ofBiStream(mapAfterTransfer);
+    }
+
+    @Override
+    public BiStream<K, V> filterVal(Predicate<? super V> valPredicate) {
+        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            if (valPredicate.test(entry.getValue())) {
+                mapAfterTransfer.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return ofBiStream(mapAfterTransfer);
+    }
+
+    @Override
+    public BiStream<K, V> compute(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         return null;
     }
 
     @Override
-    public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
+    public BiStream<K, V> computeIfAbsent(K k, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         return null;
     }
 
     @Override
-    public Stream<T> distinct() {
+    public BiStream<K, V> computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Preconditions.checkNotNull(remappingFunction);
+        Map<K, V> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        V oldValue;
+        if ((oldValue = innerMap.get(key)) != null) {
+            V newValue = remappingFunction.apply(key, oldValue);
+            if (newValue != null) {
+                mapAfterTransfer.put(key, newValue);
+            } else {
+                innerMap.remove(key);
+            }
+        }
+        return ofBiStream(innerMap);
+    }
+
+    @Override
+    public <NK, NV> BiStream<NK, NV> map(Function<? super K, ? extends NK> keyMapper, Function<? super V, ? extends NV> valMapper) {
+        Map<NK, NV> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            NK newKey = keyMapper.apply(entry.getKey());
+            NV newVal = valMapper.apply(entry.getValue());
+            mapAfterTransfer.put(newKey, newVal);
+        }
+        return ofBiStream(mapAfterTransfer);
+    }
+
+    @Override
+    public <NK> BiStream<NK, V> mapKey(Function<? super K, ? extends NK> keyMapper) {
+        Map<NK, V> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            NK newKey = keyMapper.apply(entry.getKey());
+            V newVal = entry.getValue();
+            mapAfterTransfer.put(newKey, newVal);
+        }
+        return ofBiStream(mapAfterTransfer);
+    }
+
+    @Override
+    public <NV> BiStream<K, NV> mapVal(Function<? super V, ? extends NV> valMapper) {
+        Map<K, NV> mapAfterTransfer = new HashMap<>(innerMap.keySet().size());
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            K newKey = entry.getKey();
+            NV newVal = valMapper.apply(entry.getValue());
+            mapAfterTransfer.put(newKey, newVal);
+        }
+        return ofBiStream(mapAfterTransfer);
+    }
+
+    @Override
+    public <NV, NK> BiStream<NK, NV> flatMap(Function<? super K, ? extends NK> keyMapper, Function<? super V, ? extends NV> valMapper) {
         return null;
     }
 
     @Override
-    public Stream<T> sorted() {
+    public BiStream<K, V> distinct() {
         return null;
     }
 
     @Override
-    public Stream<T> sorted(Comparator<? super T> comparator) {
-        return null;
-    }
+    public void forEach(BiConsumer<? super K, ? super V> action) {
 
-    @Override
-    public Stream<T> limit(long maxSize) {
-        return null;
-    }
-
-    @Override
-    public Stream<T> skip(long n) {
-        return null;
-    }
-
-    @Override
-    public void forEach(Consumer<? super T> action) {
-
-    }
-
-    @Override
-    public T reduce(T identity, BinaryOperator<T> accumulator) {
-        return null;
-    }
-
-    @Override
-    public Optional<T> min(Comparator<? super T> comparator) {
-        return null;
-    }
-
-    @Override
-    public Optional<T> max(Comparator<? super T> comparator) {
-        return null;
     }
 
     @Override
@@ -96,33 +228,23 @@ public class MapStream<K, V, T extends Map.Entry<K, V>> implements Stream<T> {
     }
 
     @Override
-    public boolean anyMatch(Predicate<? super T> predicate) {
+    public boolean anyMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
         return false;
     }
 
     @Override
-    public boolean allMatch(Predicate<? super T> predicate) {
+    public boolean allMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
         return false;
     }
 
     @Override
-    public boolean noneMatch(Predicate<? super T> predicate) {
+    public boolean noneMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
         return false;
     }
 
     @Override
-    public Optional<T> findFirst() {
-        return null;
-    }
-
-    @Override
-    public Optional<T> findAny() {
-        return null;
-    }
-
-    @Override
-    public <R, A> R collect(Supplier<A> supplier) {
-        return null;
+    public Map<K, V> toMap() {
+        return innerMap;
     }
 
 }
