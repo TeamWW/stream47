@@ -255,18 +255,35 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
 
     @Override
     public boolean anyMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
-        for
+        Preconditions.checkNotNull(predicate);
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            if (predicate.apply(entry.getKey(), entry.getValue())) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean allMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
-        return false;
+        Preconditions.checkNotNull(predicate);
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            if (!predicate.apply(entry.getKey(), entry.getValue())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean noneMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
-        return false;
+        Preconditions.checkNotNull(predicate);
+        for (Map.Entry<K, V> entry : innerMap.entrySet()) {
+            if (predicate.apply(entry.getKey(), entry.getValue())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
