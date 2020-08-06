@@ -3,6 +3,9 @@ import com.lucifiere.funtion.Predicate;
 import com.lucifiere.stream.Streams;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author created by XD.Wang
  * Date 2020/8/5.
@@ -22,6 +25,13 @@ public class StreamTest {
                 return integer > 1;
             }
         }).count();
+
+        Streams.of(new HashMap<Long, String>()).filter(new Predicate<Map.Entry<Long, String>>() {
+            @Override
+            public boolean test(Map.Entry<Long, String> longStringEntry) {
+                return false;
+            }
+        });
     }
 
 }

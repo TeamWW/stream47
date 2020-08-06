@@ -1,6 +1,7 @@
 package com.lucifiere.stream;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.lucifiere.funtion.*;
 
 import java.util.Comparator;
@@ -22,17 +23,27 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public Stream<T> filter(Predicate<? super T> predicate) {
-        return null;
+        List<T> list = Lists.newArrayList();
+        for (T t : innerList) {
+            if (predicate.test(t)) {
+                list.add(t);
+            }
+        }
+        return Streams.of(list);
     }
 
     @Override
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-        return null;
+        List<R> rList = Lists.newArrayList();
+        for (T t : innerList) {
+            rList.add(mapper.apply(t));
+        }
+        return Streams.of(rList);
     }
 
     @Override
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
-        return null;
+        
     }
 
     @Override
