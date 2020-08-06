@@ -161,7 +161,6 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
                 return Optional.absent();
             }
         } else {
-            // add or replace old mapping
             innerMap.put(key, newValue);
             return Optional.of(newValue);
         }
@@ -256,6 +255,7 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
 
     @Override
     public boolean anyMatch(BiFunction<? super K, ? super V, Boolean> predicate) {
+        for
         return false;
     }
 
