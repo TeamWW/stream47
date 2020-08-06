@@ -32,7 +32,7 @@ public class ListStream<T> implements Stream<T> {
     }
 
     @Override
-    public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
+    public <R> Stream<R> flatMap(Function<? super T, List<? extends R>> mapper) {
         return null;
     }
 

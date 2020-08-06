@@ -6,6 +6,7 @@ import com.lucifiere.funtion.BiFunction;
 import com.lucifiere.funtion.Function;
 import com.lucifiere.funtion.Predicate;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,7 +100,7 @@ public interface BiStream<K, V> {
      * @param valMapper 值的映射逻辑
      * @return 结果流
      */
-    <NV, NK> BiStream<NK, NV> flatMap(Function<? super K, ? extends NK> keyMapper, Function<? super V, ? extends NV> valMapper);
+    <NV, NK> BiStream<NK, NV> flatMap(Function<? super K, List<? extends NK>> keyMapper, Function<? super V, List<? extends NV>> valMapper);
 
     /**
      * 去重

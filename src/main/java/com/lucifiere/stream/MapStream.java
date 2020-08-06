@@ -231,7 +231,7 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
     }
 
     @Override
-    public <NV, NK> BiStream<NK, NV> flatMap(Function<? super K, ? extends NK> keyMapper, Function<? super V, ? extends NV> valMapper) {
+    public <NV, NK> BiStream<NK, NV> flatMap(Function<? super K, List<? extends NK>> keyMapper, Function<? super V, List<? extends NV>> valMapper) {
         return null;
     }
 

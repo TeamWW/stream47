@@ -38,7 +38,7 @@ public interface Stream<T> {
      * @param <R>    R
      * @return 结果流
      */
-    <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper);
+    <R> Stream<R> flatMap(Function<? super T, List<? extends R>> mapper);
 
     /**
      * 去重
