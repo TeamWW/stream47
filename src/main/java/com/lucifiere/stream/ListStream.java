@@ -1,12 +1,12 @@
 package com.lucifiere.stream;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.lucifiere.funtion.*;
+import com.lucifiere.funtion.BinaryOperator;
+import com.lucifiere.funtion.Consumer;
+import com.lucifiere.funtion.Function;
+import com.lucifiere.funtion.Predicate;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * LIST流
@@ -24,7 +24,7 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public Stream<T> filter(Predicate<? super T> predicate) {
-        List<T> list = Lists.newArrayList();
+        List<T> list = new ArrayList<>();
         for (T t : innerList) {
             if (predicate.test(t)) {
                 list.add(t);
@@ -35,7 +35,7 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-        List<R> rList = Lists.newArrayList();
+        List<R> rList = new ArrayList<>();
         for (T t : innerList) {
             rList.add(mapper.apply(t));
         }
@@ -44,22 +44,34 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public <R> Stream<R> flatMap(Function<? super T, List<? extends R>> mapper) {
-        return null;
+        List<R> rList = new ArrayList<>();
+        for (T t : innerList) {
+            rList.addAll(mapper.apply(t));
+        }
+        return Streams.of(rList);
     }
 
     @Override
     public Stream<T> distinct() {
-        return null;
+        Set<T> set = new HashSet<>();
+        for (T t : innerList) {
+            set.add(t);
+        }
+        return Streams.of(new ArrayList<>(set));
     }
 
     @Override
     public Stream<T> sorted() {
-        return null;
+        T[] array = (T[]) innerList.toArray();
+        Arrays.sort(array);
+        return Streams.of(Arrays.asList(array));
     }
 
     @Override
     public Stream<T> sorted(Comparator<? super T> comparator) {
-        return null;
+        T[] array = (T[]) innerList.toArray();
+        Arrays.sort(array, comparator);
+        return Streams.of(Arrays.asList(array));
     }
 
     @Override
@@ -74,7 +86,9 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public void forEach(Consumer<? super T> action) {
-
+        for (T t : innerList) {
+            action.accept(t);
+        }
     }
 
     @Override
@@ -94,22 +108,37 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public long count() {
-        return 0;
+        return innerList.size();
     }
 
     @Override
     public boolean anyMatch(Predicate<? super T> predicate) {
+        for (T t : innerList) {
+            if (predicate.test(t)) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean allMatch(Predicate<? super T> predicate) {
-        return false;
+        for (T t : innerList) {
+            if (!predicate.test(t)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean noneMatch(Predicate<? super T> predicate) {
-        return false;
+        for (T t : innerList) {
+            if (predicate.test(t)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -124,7 +153,7 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public List<T> toList() {
-        return null;
+        return innerList;
     }
 
     @Override
@@ -134,12 +163,13 @@ public class ListStream<T> implements Stream<T> {
 
     @Override
     public <K, V> Map<K, List<V>> singleGroupBy(Function<T, K> function) {
+
         return null;
     }
 
     @Override
     public <K, V> Map<K, V> groupBy(Function<T, K> function) {
+
         return null;
     }
-
 }

@@ -27,12 +27,6 @@ public class StreamTest {
             }
         }).count();
 
-        Streams.of(new HashMap<Long, String>()).filter(new Predicate<Map.Entry<Long, String>>() {
-            @Override
-            public boolean test(Map.Entry<Long, String> longStringEntry) {
-                return false;
-            }
-        });
     }
 
     @Test
