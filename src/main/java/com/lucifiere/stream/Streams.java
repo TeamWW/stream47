@@ -13,8 +13,8 @@ import java.util.Map;
  */
 final public class Streams {
 
-    public static <T extends Map.Entry<K, V>, K, V> Stream<T> of(Map<K, V> map) {
-        return new MapStream<>(map);
+    public static <K, V> BiStream<K, V> of(Map<K, V> map) {
+        return MapStream.ofBiStream(map);
     }
 
     public static <T> Stream<T> of(List<T> ll) {
@@ -25,5 +25,5 @@ final public class Streams {
     public static <T> Stream<T> of(T... ll) {
         return of(Lists.newArrayList(ll));
     }
-    
+
 }

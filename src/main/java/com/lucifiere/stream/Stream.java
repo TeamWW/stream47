@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.lucifiere.funtion.*;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 非延迟计算串行流
@@ -36,7 +38,7 @@ public interface Stream<T> {
      * @param <R>    R
      * @return 结果流
      */
-    <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper);
+    <R> Stream<R> flatMap(Function<? super T, List<? extends R>> mapper);
 
     /**
      * 去重
@@ -156,11 +158,35 @@ public interface Stream<T> {
     /**
      * 提取结果
      *
-     * @param supplier 提取器
-     * @param <R>      R
-     * @param <A>      A
-     * @return r
+     * @return 结果
      */
-    <R, A> R collect(Supplier<A> supplier);
+    List<T> toList();
+
+    /**
+     * 提取结果
+     *
+     * @return 结果
+     */
+    List<T> toSet();
+
+    /**
+     * 一对一分组
+     *
+     * @param function 分组逻辑
+     * @param <K>      K类型
+     * @param <V>      V类型
+     * @return K -> V
+     */
+    <K, V> Map<K, List<V>> singleGroupBy(Function<T, K> function);
+
+    /**
+     * 一对N分组
+     *
+     * @param function 分组逻辑
+     * @param <K>      K类型
+     * @param <V>      V类型
+     * @return K -> V
+     */
+    <K, V> Map<K, V> groupBy(Function<T, K> function);
 
 }
