@@ -6,6 +6,7 @@ import com.lucifiere.funtion.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 非延迟计算串行流
@@ -68,7 +69,7 @@ public interface Stream<T> {
      * @param maxSize 位数
      * @return 结果流
      */
-    Stream<T> limit(long maxSize);
+    Stream<T> limit(int maxSize);
 
     /**
      * 游标前移
@@ -76,7 +77,7 @@ public interface Stream<T> {
      * @param n 位数
      * @return 结果流
      */
-    Stream<T> skip(long n);
+    Stream<T> skip(int n);
 
     /**
      * 迭代
@@ -167,26 +168,24 @@ public interface Stream<T> {
      *
      * @return 结果
      */
-    List<T> toSet();
+    Set<T> toSet();
 
     /**
      * 一对一分组
      *
      * @param function 分组逻辑
      * @param <K>      K类型
-     * @param <V>      V类型
-     * @return K -> V
+     * @return K -> T
      */
-    <K, V> Map<K, List<V>> singleGroupBy(Function<T, K> function);
+    <K> Map<K, List<T>> singleGroupBy(Function<T, K> function);
 
     /**
      * 一对N分组
      *
      * @param function 分组逻辑
      * @param <K>      K类型
-     * @param <V>      V类型
      * @return K -> V
      */
-    <K, V> Map<K, V> groupBy(Function<T, K> function);
+    <K> Map<K, T> groupBy(Function<T, K> function);
 
 }
