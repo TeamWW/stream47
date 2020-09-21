@@ -1,6 +1,5 @@
 import com.lucifiere.funtion.Function;
 import com.lucifiere.funtion.Predicate;
-import com.lucifiere.stream.Stream;
 import com.lucifiere.stream.Streams;
 import org.junit.Test;
 
@@ -46,6 +45,7 @@ public class StreamTest {
 //            }
 //        });
 //        System.out.println(s);
+
     }
 
 }

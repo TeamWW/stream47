@@ -17,7 +17,7 @@ import java.util.*;
 public class ListStream<T> implements Stream<T> {
 
     private final List<T> innerList;
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public static final Stream EMPTY_LIST_STREAM = Streams.of(Collections.emptyList());
 
     public ListStream(List<T> innerList) {
@@ -75,6 +75,7 @@ public class ListStream<T> implements Stream<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Stream<T> sorted() {
         if (isEmpty()) {
             return this;

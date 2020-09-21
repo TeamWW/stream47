@@ -53,6 +53,204 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
         return new MapStream<>(Optional.fromNullable(innerMap).or(Maps.<K, V>newConcurrentMap()));
     }
 
+    private static class SortedMapView<K, V> extends TreeMap<K, V> {
+
+        private final MapStream<K, V> stream;
+
+        private final TreeMap<K, V> innerMap;
+
+        private SortedMapView(MapStream<K, V> mapStream) {
+            Preconditions.checkArgument(mapStream.innerMap instanceof TreeMap, new UnsupportedOperationException());
+            this.stream = mapStream;
+            this.innerMap = (TreeMap<K, V>) mapStream.innerMap;
+        }
+
+        @Override
+        public int size() {
+            return stream.limit - stream.cursor;
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return innerMap.containsKey(key);
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            return innerMap.containsValue(value);
+        }
+
+        @Override
+        public V get(Object key) {
+            return innerMap.get(key);
+        }
+
+        @Override
+        public Comparator<? super K> comparator() {
+            return innerMap.comparator();
+        }
+
+        @Override
+        public K firstKey() {
+            return innerMap.firstKey();
+        }
+
+        @Override
+        public K lastKey() {
+            return innerMap.lastKey();
+        }
+
+        @Override
+        public void putAll(Map<? extends K, ? extends V> map) {
+            innerMap.putAll(map);
+        }
+
+        @Override
+        public V put(K key, V value) {
+            return innerMap.put(key, value);
+        }
+
+        @Override
+        public V remove(Object key) {
+            return innerMap.remove(key);
+        }
+
+        @Override
+        public void clear() {
+            innerMap.clear();
+        }
+
+        @Override
+        public Object clone() {
+            return innerMap.clone();
+        }
+
+        @Override
+        public Map.Entry<K, V> firstEntry() {
+            return innerMap.firstEntry();
+        }
+
+        @Override
+        public Map.Entry<K, V> lastEntry() {
+            return innerMap.lastEntry();
+        }
+
+        @Override
+        public Map.Entry<K, V> pollFirstEntry() {
+            return innerMap.pollFirstEntry();
+        }
+
+        @Override
+        public Map.Entry<K, V> pollLastEntry() {
+            return innerMap.pollLastEntry();
+        }
+
+        @Override
+        public Map.Entry<K, V> lowerEntry(K key) {
+            return innerMap.lowerEntry(key);
+        }
+
+        @Override
+        public K lowerKey(K key) {
+            return innerMap.lowerKey(key);
+        }
+
+        @Override
+        public Map.Entry<K, V> floorEntry(K key) {
+            return innerMap.floorEntry(key);
+        }
+
+        @Override
+        public K floorKey(K key) {
+            return innerMap.floorKey(key);
+        }
+
+        @Override
+        public Map.Entry<K, V> ceilingEntry(K key) {
+            return innerMap.ceilingEntry(key);
+        }
+
+        @Override
+        public K ceilingKey(K key) {
+            return innerMap.ceilingKey(key);
+        }
+
+        @Override
+        public Map.Entry<K, V> higherEntry(K key) {
+            return innerMap.higherEntry(key);
+        }
+
+        @Override
+        public K higherKey(K key) {
+            return innerMap.higherKey(key);
+        }
+
+        @Override
+        public Set<K> keySet() {
+            return innerMap.keySet();
+        }
+
+        @Override
+        public NavigableSet<K> navigableKeySet() {
+            return innerMap.navigableKeySet();
+        }
+
+        @Override
+        public NavigableSet<K> descendingKeySet() {
+            return innerMap.descendingKeySet();
+        }
+
+        @Override
+        public Collection<V> values() {
+            return innerMap.values();
+        }
+
+        @Override
+        public Set<Map.Entry<K, V>> entrySet() {
+            return innerMap.entrySet();
+        }
+
+        @Override
+        public NavigableMap<K, V> descendingMap() {
+            return innerMap.descendingMap();
+        }
+
+        @Override
+        public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
+            return innerMap.subMap(fromKey, fromInclusive, toKey, toInclusive);
+        }
+
+        @Override
+        public NavigableMap<K, V> headMap(K toKey, boolean inclusive) {
+            return innerMap.headMap(toKey, inclusive);
+        }
+
+        @Override
+        public NavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
+            return innerMap.tailMap(fromKey, inclusive);
+        }
+
+        @Override
+        public SortedMap<K, V> subMap(K fromKey, K toKey) {
+            return innerMap.subMap(fromKey, toKey);
+        }
+
+        @Override
+        public SortedMap<K, V> headMap(K toKey) {
+            return innerMap.headMap(toKey);
+        }
+
+        @Override
+        public SortedMap<K, V> tailMap(K fromKey) {
+            return innerMap.tailMap(fromKey);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return innerMap.isEmpty();
+        }
+    }
+    
     private static <K extends Comparable<K>, V> SortedBiStream<K, V> ofSortedStream(Map<K, V> innerMap) {
         if (innerMap == null || innerMap.size() == 0) {
             return new MapStream<>(new TreeMap<K, V>());
@@ -156,10 +354,8 @@ public class MapStream<K, V> implements SortedBiStream<K, V> {
         if (newValue == null) {
             if (oldValue != null || innerMap.containsKey(key)) {
                 innerMap.remove(key);
-                return Optional.absent();
-            } else {
-                return Optional.absent();
             }
+            return Optional.absent();
         } else {
             innerMap.put(key, newValue);
             return Optional.of(newValue);

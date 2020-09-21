@@ -1,7 +1,6 @@
 package com.lucifiere.stream;
 
-import com.google.common.collect.Lists;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +22,7 @@ final public class Streams {
 
     @SafeVarargs
     public static <T> Stream<T> of(T... ll) {
-        return of(Lists.newArrayList(ll));
+        return of(Arrays.asList(ll));
     }
 
 }
