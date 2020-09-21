@@ -1,6 +1,7 @@
 package com.lucifiere.stream;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.lucifiere.funtion.BinaryOperator;
 import com.lucifiere.funtion.Consumer;
 import com.lucifiere.funtion.Function;
@@ -11,38 +12,34 @@ import java.util.*;
 /**
  * LIST流
  *
- * @author created by XD.Wang
- * Date 2020/8/5.
+ * @author wuhuilin
+ * @date 2020-08-05.
  */
 public class ListStream<T> implements Stream<T> {
 
     private final List<T> innerList;
-    @SuppressWarnings("rawtypes")
-    public static final Stream EMPTY_LIST_STREAM = Streams.of(Collections.emptyList());
 
     public ListStream(List<T> innerList) {
-        this.innerList = innerList;
+        this.innerList = Lists.newArrayList(innerList);
     }
 
     @Override
     public Stream<T> filter(Predicate<? super T> predicate) {
         if (isEmpty()) {
-            return this;
+            return emptyStream();
         }
-        List<T> list = new ArrayList<>();
-        for (T t : innerList) {
-            if (predicate.test(t)) {
-                list.add(t);
+        Iterator<T> it = innerList.iterator();
+        while (it.hasNext()) {
+            T t = it.next();
+            if (!predicate.test(t)) {
+                it.remove();
             }
         }
-        return Streams.of(list);
+        return this;
     }
 
     @Override
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-        if (isEmpty()) {
-            return Streams.of(Collections.<R>emptyList());
-        }
         List<R> rList = new ArrayList<>();
         for (T t : innerList) {
             rList.add(mapper.apply(t));
@@ -53,7 +50,7 @@ public class ListStream<T> implements Stream<T> {
     @Override
     public <R> Stream<R> flatMap(Function<? super T, List<? extends R>> mapper) {
         if (isEmpty()) {
-            return Streams.of(new ArrayList<R>());
+            return emptyStream();
         }
         List<R> rList = new ArrayList<>();
         for (T t : innerList) {
@@ -65,34 +62,29 @@ public class ListStream<T> implements Stream<T> {
     @Override
     public Stream<T> distinct() {
         if (isEmpty()) {
-            return this;
+            return emptyStream();
         }
-        Set<T> set = new HashSet<>();
-        for (T t : innerList) {
-            set.add(t);
-        }
+        Set<T> set = new HashSet<>(innerList);
         return Streams.of(new ArrayList<>(set));
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Stream<T> sorted() {
-        if (isEmpty()) {
-            return this;
+        Optional<T> optional = this.findAny();
+        if (optional.isPresent() && optional.get() instanceof Comparable) {
+            List<Comparable> compList = (List<Comparable>) innerList;
+            Collections.sort(compList);
         }
-        T[] array = (T[]) innerList.toArray();
-        Arrays.sort(array);
-        return Streams.of(Arrays.asList(array));
+        return this;
     }
 
     @Override
     public Stream<T> sorted(Comparator<? super T> comparator) {
-        if (innerList.size() <= 0) {
-            return this;
+        if (isEmpty()) {
+            return emptyStream();
         }
-        T[] array = (T[]) innerList.toArray();
-        Arrays.sort(array, comparator);
-        return Streams.of(Arrays.asList(array));
+        Collections.sort(innerList, comparator);
+        return this;
     }
 
     @Override
@@ -247,13 +239,10 @@ public class ListStream<T> implements Stream<T> {
     }
 
     private boolean isEmpty() {
-        if (null == innerList || innerList.size() <= 0) {
-            return true;
-        }
-        return false;
+        return null == innerList || innerList.size() <= 0;
     }
 
     public static <T> Stream<T> emptyStream() {
-        return (Stream<T>) EMPTY_LIST_STREAM;
+        return (Stream<T>) Streams.of(Collections.emptyList());
     }
 }
